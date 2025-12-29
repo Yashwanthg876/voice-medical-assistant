@@ -1,0 +1,11 @@
+Flask
+torch
+torchvision
+numpy
+Pillow
+opencv-python
+vosk
+librosa
+soundfile
+matplotlib
+python-dateutil
