@@ -4,13 +4,45 @@
   <title>Voice Medical Assistant</title>
 </head>
 <body>
-  <h1>Voice-Controlled Medical Assistant</h1>
 
-  <h2>Upload Image</h2>
-  <input type="file">
-  <button>Analyze</button>
+<h1>Voice to Text</h1>
 
-  <h2>Voice Command</h2>
-  <button>Record</button>
+<button onclick="recordVoice()">🎙️ Record Voice</button>
+<p id="result"></p>
+
+<script>
+function recordVoice() {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    const mediaRecorder = new MediaRecorder(stream);
+    let chunks = [];
+
+    mediaRecorder.start();
+
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+
+    setTimeout(() => {
+      mediaRecorder.stop();
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", blob, "voice.webm");
+
+        fetch("/upload_audio", {
+          method: "POST",
+          body: formData
+        })
+        .then(response => response.json())   // IMPORTANT
+        .then(data => {
+          console.log("Response JSON:", data);
+          document.getElementById("result").innerText =
+            "You said: " + data.text;   // ✅ CORRECT
+        });
+      };
+    }, 4000);
+  });
+}
+</script>
+
 </body>
 </html>
