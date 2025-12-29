@@ -4,12 +4,9 @@
   <title>Voice Medical Assistant</title>
 </head>
 <body>
-
 <h1>Voice to Text</h1>
-
 <button onclick="recordVoice()">🎙️ Record Voice</button>
 <p id="result"></p>
-
 <script>
 function recordVoice() {
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -32,17 +29,18 @@ function recordVoice() {
           method: "POST",
           body: formData
         })
-        .then(response => response.json())   // IMPORTANT
+        .then(response => response.json())
         .then(data => {
-          console.log("Response JSON:", data);
-          document.getElementById("result").innerText =
-            "You said: " + data.text;   // ✅ CORRECT
+          console.log("SERVER RESPONSE:", data);
+
+          document.getElementById("result").innerHTML =
+            "<b>You said:</b> " + data.text + "<br>" +
+            "<b>Detected intent:</b> " + data.intent;
         });
       };
     }, 4000);
   });
 }
 </script>
-
 </body>
 </html>
