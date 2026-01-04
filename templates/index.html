@@ -1,46 +1,173 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Voice Medical Assistant</title>
+    <meta charset="UTF-8">
+    <title>Voice-Controlled Medical Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .section {
+            background: #ffffff;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 8px;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        input[type="file"] {
+            margin-top: 10px;
+        }
+
+        .output {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .intent {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .emergency {
+            color: red;
+        }
+    </style>
 </head>
 <body>
-<h1>Voice to Text</h1>
-<button onclick="recordVoice()">🎙️ Record Voice</button>
-<p id="result"></p>
+
+<h1>🩺 Voice-Controlled Medical Assistant</h1>
+
+<!-- ================= VOICE SECTION ================= -->
+<div class="section">
+    <h2>🎙 Voice Input</h2>
+    <p>Click the button and speak clearly.</p>
+
+    <button onclick="recordVoice()">Record Voice</button>
+
+    <div class="output" id="voiceResult"></div>
+</div>
+
+<!-- ================= IMAGE SECTION ================= -->
+<div class="section">
+    <h2>🖼 Medical Image Analysis</h2>
+    <p>Upload an image (X-ray / scan).</p>
+
+    <input type="file" id="imageInput">
+    <br>
+    <button onclick="uploadImage()">Analyze Image</button>
+
+    <div class="output" id="imageResult"></div>
+</div>
+
 <script>
+/* ================= VOICE RECORDING ================= */
 function recordVoice() {
-  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-    const mediaRecorder = new MediaRecorder(stream);
-    let chunks = [];
+    document.getElementById("voiceResult").innerHTML = "Listening...";
 
-    mediaRecorder.start();
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        const mediaRecorder = new MediaRecorder(stream);
+        let chunks = [];
 
-    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.start();
 
-    setTimeout(() => {
-      mediaRecorder.stop();
+        mediaRecorder.ondataavailable = e => {
+            chunks.push(e.data);
+        };
 
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        const formData = new FormData();
-        formData.append("audio", blob, "voice.webm");
+        setTimeout(() => {
+            mediaRecorder.stop();
 
-        fetch("/upload_audio", {
-          method: "POST",
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log("SERVER RESPONSE:", data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: "audio/webm" });
+                const formData = new FormData();
+                formData.append("audio", blob, "voice.webm");
 
-          document.getElementById("result").innerHTML =
-            "<b>You said:</b> " + data.text + "<br>" +
-            "<b>Detected intent:</b> " + data.intent;
-        });
-      };
-    }, 4000);
-  });
+                fetch("/upload_audio", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let intentClass = data.intent === "EMERGENCY" ? "emergency" : "";
+
+                    document.getElementById("voiceResult").innerHTML =
+                        "<b>You said:</b> " + data.text + "<br>" +
+                        "<span class='intent " + intentClass + "'>" +
+                        "Detected intent: " + data.intent +
+                        "</span>";
+                })
+                .catch(error => {
+                    document.getElementById("voiceResult").innerText =
+                        "Error processing voice input";
+                });
+            };
+        }, 4000);
+    })
+    .catch(() => {
+        document.getElementById("voiceResult").innerText =
+            "Microphone access denied";
+    });
+}
+
+/* ================= IMAGE UPLOAD ================= */
+function uploadImage() {
+    const imageInput = document.getElementById("imageInput");
+
+    if (imageInput.files.length === 0) {
+        alert("Please select an image first");
+        return;
+    }
+
+    document.getElementById("imageResult").innerHTML = "Analyzing image...";
+
+    const formData = new FormData();
+    formData.append("image", imageInput.files[0]);
+
+    fetch("/upload_image", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("imageResult").innerHTML =
+            "<b>Prediction:</b> " + data.prediction + "<br>" +
+            "<b>Confidence:</b> " + (data.confidence * 100).toFixed(1) + "%";
+    })
+    .catch(() => {
+        document.getElementById("imageResult").innerText =
+            "Error analyzing image";
+    });
 }
 </script>
+
 </body>
 </html>
