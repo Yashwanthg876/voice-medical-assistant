@@ -5,6 +5,7 @@ import os
 from src.asr_vosk import speech_to_text
 from src.intent import detect_intent
 from src.image_model import predict_disease
+from src.tts import speak
 
 
 # ==================== APP SETUP ====================
@@ -15,9 +16,20 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
 
+# ==================== EMERGENCY HANDLER ====================
+def handle_emergency(text):
+    print("🚨 EMERGENCY ALERT TRIGGERED 🚨")
+    print("User message:", text)
+    print("Notifying caregiver / hospital (SIMULATED)")
+
+    return {
+        "status": "ALERT_SENT",
+        "message": "Emergency alert sent to caregiver and hospital"
+    }
+
+
 # ==================== ROUTES ====================
 
-# Home page
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -38,10 +50,10 @@ def upload_audio():
         webm_path = os.path.join(UPLOAD_FOLDER, "voice.webm")
         wav_path = os.path.join(UPLOAD_FOLDER, "voice.wav")
 
-        # Save uploaded audio
+        # Save audio
         audio.save(webm_path)
 
-        # Convert webm -> wav using ffmpeg
+        # Convert to WAV
         cmd = (
             f'ffmpeg -y -i "{webm_path}" '
             f'-ac 1 -ar 16000 -acodec pcm_s16le "{wav_path}"'
@@ -54,11 +66,27 @@ def upload_audio():
                 "intent": "ERROR"
             })
 
-        # Speech to text
+        # Speech → Text
         text = speech_to_text(wav_path)
 
-        # Intent detection
+        # Intent Detection
         intent = detect_intent(text)
+
+        # Emergency Handling
+        if intent == "EMERGENCY":
+            alert = handle_emergency(text)
+            speak("Emergency detected. Alert has been sent to caregiver and hospital.")
+
+            return jsonify({
+                "text": text,
+                "intent": intent,
+                "alert_status": alert["status"],
+                "alert_message": alert["message"]
+            })
+
+        # Normal Voice Feedback
+        response_text = f"You said {text}. Detected intent is {intent}."
+        speak(response_text)
 
         return jsonify({
             "text": text if text else "No speech detected",
@@ -84,7 +112,6 @@ def upload_image():
         image_path = os.path.join(UPLOAD_FOLDER, image.filename)
         image.save(image_path)
 
-        # AI image prediction
         result = predict_disease(image_path)
 
         return jsonify({
