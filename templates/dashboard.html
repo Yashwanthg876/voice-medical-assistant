@@ -1,43 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Welcome, {{ name }}</h1>
-<p>Your personal medical assistant dashboard</p>
+<div class="card">
+    <h2>Welcome, {{ name }} 👋</h2>
+    <p>
+        This is your personal medical dashboard.  
+        Use the tools below to interact with the AI assistant and manage your health insights.
+    </p>
+</div>
 
-<div class="cards">
-
-    <div class="card">
-        <h3>🎙 Voice Assistant</h3>
+<div class="grid">
+    <div class="card feature-card" onclick="location.href='/assistant'">
+        <h4>🎙️ Voice Medical Assistant</h4>
         <p>
-            Speak your symptoms and get instant analysis using AI.
+            Interact using voice commands to get medical insights and assistance.
         </p>
-        <a href="/" class="btn">Open Assistant</a>
     </div>
 
-    <div class="card">
-        <h3>🖼 Medical Image Diagnosis</h3>
+    <div class="card feature-card" onclick="location.href='/chatbot'">
+        <h4>💬 AI Medical Chatbot</h4>
         <p>
-            Upload X-rays or scans to detect possible medical conditions.
+            Ask questions about symptoms, precautions, and general medical information.
         </p>
-        <a href="/" class="btn">Upload Image</a>
     </div>
 
-    <div class="card">
-        <h3>💬 AI Medical Chatbot</h3>
+    <div class="card feature-card" onclick="location.href='/reports'">
+        <h4>📊 Medical Reports</h4>
         <p>
-            Ask medical questions, precautions, and general guidance.
+            View your past voice and chatbot interactions and diagnosis history.
         </p>
-        <a href="#" class="btn">Open Chatbot</a>
     </div>
-
-    <div class="card">
-        <h3>🚨 Emergency Support</h3>
-        <p>
-            Automatic emergency detection and alert simulation.
-        </p>
-        <a href="/" class="btn btn-danger">Emergency Mode</a>
-    </div>
-
 </div>
 
 {% endblock %}
