@@ -2,27 +2,38 @@
 {% block content %}
 
 <h1>💬 AI Medical Chatbot</h1>
-<p>Ask medical questions, symptoms, or precautions.</p>
+<p>Ask about symptoms, precautions, and general medical information.</p>
 
 <div class="card">
-    <textarea id="userMessage" rows="4" style="width:100%; font-size:16px;"></textarea>
+    <textarea id="userMessage" rows="4" style="width:100%; font-size:16px;"
+        placeholder="Type your medical question here..."></textarea>
+
     <button class="btn" onclick="sendMessage()">Ask</button>
-    <p id="botReply"></p>
+
+    <pre id="botReply" style="margin-top:15px; white-space:pre-wrap;"></pre>
 </div>
 
 <script>
 function sendMessage() {
     const msg = document.getElementById("userMessage").value;
 
-    fetch("/chatbot", {
+    fetch("/chatbot_api", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            message: msg
+        })
     })
     .then(res => res.json())
     .then(data => {
         document.getElementById("botReply").innerText =
             "🤖 " + data.reply;
+    })
+    .catch(err => {
+        document.getElementById("botReply").innerText =
+            "Error communicating with chatbot";
     });
 }
 </script>

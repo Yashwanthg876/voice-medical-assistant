@@ -1,45 +1,30 @@
+from src.medical_kb import MEDICAL_KNOWLEDGE
+
 def medical_chatbot_response(user_message):
     text = user_message.lower()
 
-    if any(word in text for word in ["fever", "temperature"]):
-        return (
-            "Fever may indicate infection or inflammation. "
-            "Ensure adequate rest, hydration, and monitor temperature. "
-            "If fever persists, consult a doctor."
-        )
+    for key, data in MEDICAL_KNOWLEDGE.items():
+        if key in text:
+            response = f"🩺 Condition: {key.capitalize()}\n\n"
+            response += f"ℹ️ Information: {data['info']}\n\n"
 
-    if any(word in text for word in ["cough", "cold"]):
-        return (
-            "Cough and cold are commonly caused by viral infections. "
-            "Warm fluids, rest, and steam inhalation may help. "
-            "Seek medical advice if symptoms worsen."
-        )
+            if data["precautions"]:
+                response += "✅ Precautions:\n"
+                for p in data["precautions"]:
+                    response += f"- {p}\n"
+                response += "\n"
 
-    if any(word in text for word in ["headache", "migraine"]):
-        return (
-            "Headaches can result from stress, dehydration, or lack of sleep. "
-            "Ensure hydration and rest. Persistent headaches require medical evaluation."
-        )
+            if data["medicines"]:
+                response += "💊 Common Medicines (informational only):\n"
+                for m in data["medicines"]:
+                    response += f"- {m}\n"
+                response += "\n"
 
-    if any(word in text for word in ["chest pain", "heart"]):
-        return (
-            "Chest pain can be serious. "
-            "Seek immediate medical attention if pain is severe, persistent, or associated with breathlessness."
-        )
-
-    if any(word in text for word in ["diabetes", "sugar"]):
-        return (
-            "Diabetes requires regular monitoring and lifestyle management. "
-            "Maintain a balanced diet and follow medical advice."
-        )
-
-    if any(word in text for word in ["medicine", "tablet"]):
-        return (
-            "Medication should only be taken after consulting a healthcare professional. "
-            "Avoid self-medication."
-        )
+            response += f"👨‍⚕️ Medical Advice: {data['doctor']}"
+            return response
 
     return (
-        "I can help with general medical information, symptoms, and precautions. "
-        "Please consult a doctor for accurate diagnosis and treatment."
+        "I can assist with medical information, symptoms, and precautions.\n"
+        "Please describe your condition clearly.\n"
+        "Consult a doctor for accurate diagnosis."
     )

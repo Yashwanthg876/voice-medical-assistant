@@ -5,11 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime
 
-from src.asr_vosk import speech_to_text
-from src.intent import detect_intent
-from src.image_model import predict_disease
-from src.tts import speak
 from src.medical_chatbot import medical_chatbot_response
+from src.tts import speak
 
 
 # ==================== APP SETUP ====================
@@ -22,12 +19,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-UPLOAD_FOLDER = "uploads"
-if not os.path.exists(UPLOAD_FOLDER):
-    os.mkdir(UPLOAD_FOLDER)
 
-
-# ==================== DATABASE MODELS ====================
+# ==================== DATABASE MODEL ====================
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -35,37 +28,7 @@ class User(db.Model):
     password = db.Column(db.String(200))
 
 
-class VoiceHistory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    text = db.Column(db.String(500))
-    intent = db.Column(db.String(50))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class ImageHistory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    prediction = db.Column(db.String(100))
-    confidence = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
 # ==================== AUTH ====================
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        user = User(
-            name=request.form["name"],
-            email=request.form["email"],
-            password=generate_password_hash(request.form["password"])
-        )
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for("login"))
-    return render_template("register.html")
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -78,26 +41,15 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
-
-
-# ==================== PAGES ====================
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html", name=session["user_name"])
+    return render_template("dashboard.html", name=session.get("user_name"))
 
 
+# ==================== CHATBOT PAGES ====================
 @app.route("/")
 def home():
-    return redirect(url_for("assistant"))
-
-
-@app.route("/assistant")
-def assistant():
-    return render_template("assistant.html")
+    return redirect(url_for("chatbot_page"))
 
 
 @app.route("/chatbot")
@@ -105,13 +57,20 @@ def chatbot_page():
     return render_template("chatbot.html")
 
 
-# ==================== CHATBOT API ====================
-@app.route("/chatbot", methods=["POST"])
-def chatbot():
+# ==================== CHATBOT API (FIXED) ====================
+@app.route("/chatbot_api", methods=["POST"])
+def chatbot_api():
     data = request.get_json()
-    reply = medical_chatbot_response(data["message"])
+
+    user_message = data.get("message", "")
+    reply = medical_chatbot_response(user_message)
+
+    # Voice feedback
     speak(reply)
-    return jsonify({"reply": reply})
+
+    return jsonify({
+        "reply": reply
+    })
 
 
 # ==================== INIT DB ====================
