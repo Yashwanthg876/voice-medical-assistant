@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>💬 AI Medical Chatbot</h1>
+<p>Ask medical questions, symptoms, or precautions.</p>
+
+<div class="card">
+    <textarea id="userMessage" rows="4" style="width:100%; font-size:16px;"></textarea>
+    <button class="btn" onclick="sendMessage()">Ask</button>
+    <p id="botReply"></p>
+</div>
+
+<script>
+function sendMessage() {
+    const msg = document.getElementById("userMessage").value;
+
+    fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("botReply").innerText =
+            "🤖 " + data.reply;
+    });
+}
+</script>
+
+{% endblock %}
