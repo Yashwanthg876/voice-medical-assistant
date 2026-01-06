@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Welcome, {{ name }}</h1>
+<p>Your personal medical assistant dashboard</p>
+
+<div class="cards">
+
+    <div class="card">
+        <h3>🎙 Voice Assistant</h3>
+        <p>
+            Speak your symptoms and get instant analysis using AI.
+        </p>
+        <a href="/" class="btn">Open Assistant</a>
+    </div>
+
+    <div class="card">
+        <h3>🖼 Medical Image Diagnosis</h3>
+        <p>
+            Upload X-rays or scans to detect possible medical conditions.
+        </p>
+        <a href="/" class="btn">Upload Image</a>
+    </div>
+
+    <div class="card">
+        <h3>💬 AI Medical Chatbot</h3>
+        <p>
+            Ask medical questions, precautions, and general guidance.
+        </p>
+        <a href="#" class="btn">Open Chatbot</a>
+    </div>
+
+    <div class="card">
+        <h3>🚨 Emergency Support</h3>
+        <p>
+            Automatic emergency detection and alert simulation.
+        </p>
+        <a href="/" class="btn btn-danger">Emergency Mode</a>
+    </div>
+
+</div>
+
+{% endblock %}

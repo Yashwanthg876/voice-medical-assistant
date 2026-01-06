@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Medical Assistant</h1>
+<p>Use voice or image analysis for diagnosis assistance.</p>
+
+<div class="cards">
+
+    <!-- VOICE ASSISTANT -->
+    <div class="card">
+        <h3>🎙 Voice Assistant</h3>
+        <button onclick="recordVoice()">Start Speaking</button>
+        <p id="voiceResult"></p>
+    </div>
+
+    <!-- IMAGE ANALYSIS -->
+    <div class="card">
+        <h3>🖼 Medical Image Diagnosis</h3>
+        <input type="file" id="imageInput">
+        <button onclick="uploadImage()">Analyze Image</button>
+        <p id="imageResult"></p>
+    </div>
+
+</div>
+
+<script>
+function recordVoice() {
+    document.getElementById("voiceResult").innerText = "Listening...";
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        const recorder = new MediaRecorder(stream);
+        let chunks = [];
+
+        recorder.start();
+        recorder.ondataavailable = e => chunks.push(e.data);
+
+        setTimeout(() => {
+            recorder.stop();
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: "audio/webm" });
+                const formData = new FormData();
+                formData.append("audio", blob, "voice.webm");
+
+                fetch("/upload_audio", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    let msg = "You said: " + data.text +
+                              "\nIntent: " + data.intent;
+
+                    if (data.intent === "EMERGENCY") {
+                        msg += "\n🚨 Emergency alert activated";
+                    }
+
+                    document.getElementById("voiceResult").innerText = msg;
+                });
+            };
+        }, 4000);
+    });
+}
+
+function uploadImage() {
+    const input = document.getElementById("imageInput");
+    if (input.files.length === 0) {
+        alert("Select an image first");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", input.files[0]);
+
+    fetch("/upload_image", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("imageResult").innerText =
+            "Prediction: " + data.prediction +
+            " (Confidence: " + (data.confidence * 100).toFixed(1) + "%)";
+    });
+}
+</script>
+
+{% endblock %}

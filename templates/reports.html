@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>📊 Medical Reports & History</h1>
+
+<h2>🎙 Voice Diagnosis History</h2>
+<table border="1" cellpadding="10" cellspacing="0">
+    <tr>
+        <th>Text</th>
+        <th>Intent</th>
+        <th>Date</th>
+    </tr>
+    {% for v in voice_logs %}
+    <tr>
+        <td>{{ v.text }}</td>
+        <td>{{ v.intent }}</td>
+        <td>{{ v.timestamp }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br><br>
+
+<h2>🖼 Image Diagnosis History</h2>
+<table border="1" cellpadding="10" cellspacing="0">
+    <tr>
+        <th>Prediction</th>
+        <th>Confidence</th>
+        <th>Date</th>
+    </tr>
+    {% for i in image_logs %}
+    <tr>
+        <td>{{ i.prediction }}</td>
+        <td>{{ (i.confidence * 100)|round(2) }}%</td>
+        <td>{{ i.timestamp }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
