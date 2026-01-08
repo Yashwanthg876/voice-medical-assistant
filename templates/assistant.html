@@ -1,46 +1,120 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Medical Assistant</h1>
-<p>Use voice or image analysis for diagnosis assistance.</p>
+<style>
+.assistant-container {
+    max-width: 900px;
+    margin: auto;
+}
 
-<div class="cards">
+.assistant-header {
+    margin-bottom: 20px;
+}
 
-    <!-- VOICE ASSISTANT -->
-    <div class="card">
-        <h3>🎙 Voice Assistant</h3>
-        <button onclick="recordVoice()">Start Speaking</button>
-        <p id="voiceResult"></p>
+.assistant-header h1 {
+    margin-bottom: 5px;
+}
+
+.assistant-header p {
+    color: #555;
+}
+
+.voice-card {
+    background: white;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.mic-button {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: none;
+    background-color: #dc2626;
+    color: white;
+    font-size: 36px;
+    cursor: pointer;
+    margin: 20px 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mic-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.status {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.output-card {
+    margin-top: 25px;
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.output-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #374151;
+}
+</style>
+
+<div class="assistant-container">
+
+    <div class="assistant-header">
+        <h1>🎙️ Voice Medical Assistant</h1>
+        <p>
+            Speak naturally to describe your symptoms or request medical help.
+            The assistant will analyze your voice input and respond accordingly.
+        </p>
     </div>
 
-    <!-- IMAGE ANALYSIS -->
-    <div class="card">
-        <h3>🖼 Medical Image Diagnosis</h3>
-        <input type="file" id="imageInput">
-        <button onclick="uploadImage()">Analyze Image</button>
-        <p id="imageResult"></p>
+    <div class="voice-card">
+        <p class="status" id="status">Press the microphone and start speaking</p>
+
+        <button class="mic-button" onclick="startRecording()">🎤</button>
+
+        <div class="output-card">
+            <div class="output-label">📝 Transcribed Text</div>
+            <p id="transcript">—</p>
+
+            <div class="output-label" style="margin-top:15px;">🧠 Detected Intent</div>
+            <p id="intent">—</p>
+        </div>
     </div>
 
 </div>
 
 <script>
-function recordVoice() {
-    document.getElementById("voiceResult").innerText = "Listening...";
+let mediaRecorder;
+let audioChunks = [];
+
+function startRecording() {
+    document.getElementById("status").innerText = "Listening... please speak";
 
     navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-        const recorder = new MediaRecorder(stream);
-        let chunks = [];
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
 
-        recorder.start();
-        recorder.ondataavailable = e => chunks.push(e.data);
+            audioChunks = [];
 
-        setTimeout(() => {
-            recorder.stop();
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: "audio/webm" });
+            mediaRecorder.ondataavailable = e => {
+                audioChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                document.getElementById("status").innerText = "Processing voice input...";
+
+                const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
                 const formData = new FormData();
-                formData.append("audio", blob, "voice.webm");
+                formData.append("audio", audioBlob);
 
                 fetch("/upload_audio", {
                     method: "POST",
@@ -48,40 +122,23 @@ function recordVoice() {
                 })
                 .then(res => res.json())
                 .then(data => {
-                    let msg = "You said: " + data.text +
-                              "\nIntent: " + data.intent;
-
-                    if (data.intent === "EMERGENCY") {
-                        msg += "\n🚨 Emergency alert activated";
-                    }
-
-                    document.getElementById("voiceResult").innerText = msg;
+                    document.getElementById("transcript").innerText = data.text || "No text detected";
+                    document.getElementById("intent").innerText = data.intent || "Unknown";
+                    document.getElementById("status").innerText = "Press the microphone to speak again";
+                })
+                .catch(() => {
+                    document.getElementById("status").innerText = "Error processing audio";
                 });
             };
-        }, 4000);
-    });
-}
 
-function uploadImage() {
-    const input = document.getElementById("imageInput");
-    if (input.files.length === 0) {
-        alert("Select an image first");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("image", input.files[0]);
-
-    fetch("/upload_image", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("imageResult").innerText =
-            "Prediction: " + data.prediction +
-            " (Confidence: " + (data.confidence * 100).toFixed(1) + "%)";
-    });
+            // Auto stop after 6 seconds
+            setTimeout(() => {
+                mediaRecorder.stop();
+            }, 6000);
+        })
+        .catch(() => {
+            document.getElementById("status").innerText = "Microphone access denied";
+        });
 }
 </script>
 
