@@ -1,40 +1,140 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>📊 Medical Reports & History</h1>
+<style>
+.reports-header {
+    margin-bottom: 25px;
+}
 
-<h2>🎙 Voice Diagnosis History</h2>
-<table border="1" cellpadding="10" cellspacing="0">
-    <tr>
-        <th>Text</th>
-        <th>Intent</th>
-        <th>Date</th>
-    </tr>
-    {% for v in voice_logs %}
-    <tr>
-        <td>{{ v.text }}</td>
-        <td>{{ v.intent }}</td>
-        <td>{{ v.timestamp }}</td>
-    </tr>
-    {% endfor %}
-</table>
+.reports-header h1 {
+    margin-bottom: 5px;
+}
 
-<br><br>
+.reports-header p {
+    color: var(--muted);
+}
 
-<h2>🖼 Image Diagnosis History</h2>
-<table border="1" cellpadding="10" cellspacing="0">
-    <tr>
-        <th>Prediction</th>
-        <th>Confidence</th>
-        <th>Date</th>
-    </tr>
-    {% for i in image_logs %}
-    <tr>
-        <td>{{ i.prediction }}</td>
-        <td>{{ (i.confidence * 100)|round(2) }}%</td>
-        <td>{{ i.timestamp }}</td>
-    </tr>
-    {% endfor %}
-</table>
+.section {
+    margin-bottom: 35px;
+}
+
+.section h2 {
+    margin-bottom: 15px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px 16px;
+    text-align: left;
+}
+
+th {
+    background-color: rgba(37, 99, 235, 0.1);
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: rgba(0,0,0,0.03);
+}
+
+body.dark tr:nth-child(even) {
+    background-color: rgba(255,255,255,0.05);
+}
+
+tr:hover {
+    background-color: rgba(37,99,235,0.08);
+}
+
+.empty-state {
+    padding: 20px;
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--muted);
+    text-align: center;
+}
+</style>
+
+<div class="reports-header">
+    <h1>📁 Medical Reports</h1>
+    <p>
+        Review your previous interactions with the voice assistant and AI chatbot.
+        This history helps track medical queries and system usage.
+    </p>
+</div>
+
+<!-- Voice Reports -->
+<div class="section">
+    <h2>🎙️ Voice Assistant History</h2>
+
+    {% if voice_logs and voice_logs|length > 0 %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Transcribed Text</th>
+                    <th>Detected Intent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in voice_logs %}
+                <tr>
+                    <td>{{ v.created_at }}</td>
+                    <td>{{ v.text }}</td>
+                    <td>{{ v.intent }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            No voice interactions recorded yet.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Chatbot Reports -->
+<div class="section">
+    <h2>💬 Chatbot History</h2>
+
+    {% if chatbot_logs and chatbot_logs|length > 0 %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>User Message</th>
+                    <th>AI Response</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in chatbot_logs %}
+                <tr>
+                    <td>{{ c.created_at }}</td>
+                    <td>{{ c.user_message }}</td>
+                    <td>{{ c.bot_reply }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="empty-state">
+            No chatbot conversations available yet.
+        </div>
+    {% endif %}
+</div>
 
 {% endblock %}
