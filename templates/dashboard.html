@@ -1,35 +1,105 @@
 {% extends "base.html" %}
 {% block content %}
 
+<h1>📊 Dashboard Analytics</h1>
+<p>Overview of your medical assistant usage and activity</p>
+
+<!-- Welcome Card -->
 <div class="card">
     <h2>Welcome, {{ name }} 👋</h2>
     <p>
-        This is your personal medical dashboard.  
-        Use the tools below to interact with the AI assistant and manage your health insights.
+        Monitor your interactions with the AI medical assistant and chatbot.
+        These insights help understand usage patterns and system behavior.
     </p>
 </div>
 
+<!-- Feature Cards -->
 <div class="grid">
     <div class="card feature-card" onclick="location.href='/assistant'">
-        <h4>🎙️ Voice Medical Assistant</h4>
-        <p>
-            Interact using voice commands to get medical insights and assistance.
-        </p>
+        <h4>🎙️ Voice Assistant</h4>
+        <p>Voice-based medical interactions</p>
     </div>
 
     <div class="card feature-card" onclick="location.href='/chatbot'">
-        <h4>💬 AI Medical Chatbot</h4>
-        <p>
-            Ask questions about symptoms, precautions, and general medical information.
-        </p>
+        <h4>💬 Medical Chatbot</h4>
+        <p>Text-based medical guidance</p>
     </div>
 
     <div class="card feature-card" onclick="location.href='/reports'">
-        <h4>📊 Medical Reports</h4>
-        <p>
-            View your past voice and chatbot interactions and diagnosis history.
-        </p>
+        <h4>📁 Reports</h4>
+        <p>View past medical interactions</p>
     </div>
 </div>
+
+<!-- Analytics Section -->
+<h2 style="margin-top:40px;">📈 Usage Analytics</h2>
+
+<div class="grid">
+    <div class="card">
+        <h3>Voice Interactions (Weekly)</h3>
+        <canvas id="voiceChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Detected Intents</h3>
+        <canvas id="intentChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Chatbot Usage</h3>
+        <canvas id="chatbotChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* Voice Usage Line Chart */
+new Chart(document.getElementById("voiceChart"), {
+    type: "line",
+    data: {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        datasets: [{
+            label: "Voice Queries",
+            data: [3, 5, 2, 6, 4, 7, 5],
+            borderColor: "#2563eb",
+            backgroundColor: "rgba(37,99,235,0.2)",
+            fill: true,
+            tension: 0.4
+        }]
+    }
+});
+
+/* Intent Bar Chart */
+new Chart(document.getElementById("intentChart"), {
+    type: "bar",
+    data: {
+        labels: ["General", "Emergency", "Medication", "Symptoms"],
+        datasets: [{
+            label: "Count",
+            data: [12, 3, 6, 9],
+            backgroundColor: [
+                "#2563eb",
+                "#dc2626",
+                "#16a34a",
+                "#f59e0b"
+            ]
+        }]
+    }
+});
+
+/* Chatbot Pie Chart */
+new Chart(document.getElementById("chatbotChart"), {
+    type: "pie",
+    data: {
+        labels: ["Chatbot Used", "Not Used"],
+        datasets: [{
+            data: [70, 30],
+            backgroundColor: ["#2563eb", "#d1d5db"]
+        }]
+    }
+});
+</script>
 
 {% endblock %}
