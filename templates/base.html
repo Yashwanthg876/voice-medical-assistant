@@ -3,11 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Voice Medical Assistant</title>
+
     <style>
+        :root {
+            --bg: #f4f6f8;
+            --sidebar: #0f172a;
+            --card: #ffffff;
+            --text: #111827;
+            --muted: #555;
+        }
+
+        body.dark {
+            --bg: #0b1220;
+            --sidebar: #020617;
+            --card: #111827;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+        }
+
         body {
             margin: 0;
             font-family: "Segoe UI", Arial, sans-serif;
-            background-color: #f4f6f8;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
         }
 
         .layout {
@@ -18,7 +37,7 @@
         /* Sidebar */
         .sidebar {
             width: 240px;
-            background-color: #0f172a;
+            background-color: var(--sidebar);
             color: white;
             padding: 20px;
         }
@@ -39,11 +58,23 @@
         }
 
         .sidebar a:hover {
-            background-color: #1e293b;
+            background-color: rgba(255,255,255,0.1);
             color: white;
         }
 
-        /* Main content */
+        .toggle-btn {
+            margin-top: 30px;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background-color: #2563eb;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* Main */
         .main {
             flex: 1;
             padding: 30px;
@@ -52,15 +83,20 @@
 
         /* Cards */
         .card {
-            background: white;
+            background: var(--card);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             margin-bottom: 20px;
+            transition: background 0.3s;
         }
 
-        .card h3 {
+        .card h2, .card h3, .card h4 {
             margin-top: 0;
+        }
+
+        .card p {
+            color: var(--muted);
         }
 
         .grid {
@@ -78,37 +114,51 @@
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-
-        .feature-card h4 {
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: #555;
-            font-size: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
     </style>
 </head>
+
 <body>
 
 <div class="layout">
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>🩺 MedAssist</h2>
+
         <a href="/dashboard">Dashboard</a>
         <a href="/assistant">Assistant</a>
         <a href="/chatbot">Chatbot</a>
         <a href="/reports">Reports</a>
         <a href="/logout">Logout</a>
+
+        <button class="toggle-btn" onclick="toggleTheme()">
+            🌙 Toggle Dark Mode
+        </button>
     </div>
 
-    <!-- Main content -->
+    <!-- Main -->
     <div class="main">
         {% block content %}{% endblock %}
     </div>
 </div>
+
+<script>
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem(
+        "theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+    );
+}
+
+(function loadTheme() {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark") {
+        document.body.classList.add("dark");
+    }
+})();
+</script>
 
 </body>
 </html>
