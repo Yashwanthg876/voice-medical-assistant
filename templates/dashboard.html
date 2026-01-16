@@ -1,105 +1,96 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>📊 Dashboard Analytics</h1>
-<p>Overview of your medical assistant usage and activity</p>
-
-<!-- Welcome Card -->
 <div class="card">
-    <h2>Welcome, {{ name }} 👋</h2>
-    <p>
-        Monitor your interactions with the AI medical assistant and chatbot.
-        These insights help understand usage patterns and system behavior.
+    <h2 class="title">Dashboard</h2>
+    <p class="subtitle">
+        Welcome back. Here is an overview of your medical AI activity.
     </p>
 </div>
 
-<!-- Feature Cards -->
-<div class="grid">
-    <div class="card feature-card" onclick="location.href='/assistant'">
-        <h4>🎙️ Voice Assistant</h4>
-        <p>Voice-based medical interactions</p>
+<!-- KPI CARDS -->
+<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:20px; margin-bottom:30px;">
+
+    <div class="card">
+        <h3>🎙 Voice Queries</h3>
+        <p style="font-size:32px; font-weight:700; margin-top:10px;">
+            {{ voice_count or 0 }}
+        </p>
+        <p class="subtitle">Total voice interactions</p>
     </div>
 
-    <div class="card feature-card" onclick="location.href='/chatbot'">
-        <h4>💬 Medical Chatbot</h4>
-        <p>Text-based medical guidance</p>
+    <div class="card">
+        <h3>💬 Chatbot Queries</h3>
+        <p style="font-size:32px; font-weight:700; margin-top:10px;">
+            {{ chat_count or 0 }}
+        </p>
+        <p class="subtitle">Total chat conversations</p>
     </div>
 
-    <div class="card feature-card" onclick="location.href='/reports'">
-        <h4>📁 Reports</h4>
-        <p>View past medical interactions</p>
+    <div class="card">
+        <h3>🎯 Last Detected Intent</h3>
+        <p style="font-size:20px; font-weight:600; margin-top:14px;">
+            {{ last_intent or "—" }}
+        </p>
+        <p class="subtitle">Most recent diagnosis intent</p>
     </div>
+
+    <div class="card">
+        <h3>⚠️ Risk Indicator</h3>
+        <p style="font-size:20px; font-weight:600; margin-top:14px; color:#dc2626;">
+            Informational Only
+        </p>
+        <p class="subtitle">Not a medical diagnosis</p>
+    </div>
+
 </div>
 
-<!-- Analytics Section -->
-<h2 style="margin-top:40px;">📈 Usage Analytics</h2>
+<!-- RECENT ACTIVITY -->
+<div class="card">
+    <h3 class="title" style="font-size:22px;">Recent Activity</h3>
+    <p class="subtitle">Latest voice and chatbot interactions</p>
 
-<div class="grid">
-    <div class="card">
-        <h3>Voice Interactions (Weekly)</h3>
-        <canvas id="voiceChart"></canvas>
-    </div>
-
-    <div class="card">
-        <h3>Detected Intents</h3>
-        <canvas id="intentChart"></canvas>
-    </div>
-
-    <div class="card">
-        <h3>Chatbot Usage</h3>
-        <canvas id="chatbotChart"></canvas>
-    </div>
+    <table style="width:100%; border-collapse:collapse; margin-top:20px;">
+        <thead>
+            <tr style="text-align:left; color:#64748b; font-size:14px;">
+                <th style="padding-bottom:10px;">Type</th>
+                <th style="padding-bottom:10px;">Input</th>
+                <th style="padding-bottom:10px;">Result</th>
+                <th style="padding-bottom:10px;">Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_activity %}
+            <tr style="border-top:1px solid #e2e8f0;">
+                <td style="padding:14px 0;">{{ row.type }}</td>
+                <td>{{ row.input }}</td>
+                <td>{{ row.result }}</td>
+                <td>{{ row.time }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="padding:20px; color:#64748b;">
+                    No activity yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- QUICK ACTIONS -->
+<div class="card">
+    <h3 class="title" style="font-size:22px;">Quick Actions</h3>
 
-<script>
-/* Voice Usage Line Chart */
-new Chart(document.getElementById("voiceChart"), {
-    type: "line",
-    data: {
-        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        datasets: [{
-            label: "Voice Queries",
-            data: [3, 5, 2, 6, 4, 7, 5],
-            borderColor: "#2563eb",
-            backgroundColor: "rgba(37,99,235,0.2)",
-            fill: true,
-            tension: 0.4
-        }]
-    }
-});
+    <div style="margin-top:20px;">
+        <a href="/assistant">
+            <button class="btn btn-primary">🎙 Start Voice Assistant</button>
+        </a>
 
-/* Intent Bar Chart */
-new Chart(document.getElementById("intentChart"), {
-    type: "bar",
-    data: {
-        labels: ["General", "Emergency", "Medication", "Symptoms"],
-        datasets: [{
-            label: "Count",
-            data: [12, 3, 6, 9],
-            backgroundColor: [
-                "#2563eb",
-                "#dc2626",
-                "#16a34a",
-                "#f59e0b"
-            ]
-        }]
-    }
-});
-
-/* Chatbot Pie Chart */
-new Chart(document.getElementById("chatbotChart"), {
-    type: "pie",
-    data: {
-        labels: ["Chatbot Used", "Not Used"],
-        datasets: [{
-            data: [70, 30],
-            backgroundColor: ["#2563eb", "#d1d5db"]
-        }]
-    }
-});
-</script>
+        <a href="/chatbot" style="margin-left:15px;">
+            <button class="btn btn-primary">💬 Open Medical Chatbot</button>
+        </a>
+    </div>
+</div>
 
 {% endblock %}

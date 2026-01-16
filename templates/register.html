@@ -1,48 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register</title>
-    <style>
-        body {
-            background-color: #eef2f3;
-            font-family: Arial;
-        }
-
-        .box {
-            max-width: 400px;
-            background: white;
-            padding: 30px;
-            margin: 80px auto;
-            border-radius: 10px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
-        }
-
-        input, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 6px;
-        }
-    </style>
+    <title>Register | MedAssist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<div class="box">
-    <h2>Create Account</h2>
-    <form method="post">
-        <input name="name" placeholder="Name" required>
-        <input name="email" placeholder="Email" required>
-        <input name="password" type="password" placeholder="Password" required>
-        <button>Register</button>
-    </form>
-    <p>Already have an account? <a href="/login">Login</a></p>
+<div class="auth-wrapper">
+    <div class="auth-container">
+
+        <div class="auth-left">
+            <h1>🩺 MedAssist</h1>
+            <p>Join a smarter, AI-driven approach to medical assistance.</p>
+        </div>
+
+        <div class="auth-right">
+            <div class="auth-title">Create Account</div>
+            <div class="auth-subtitle">Start your medical AI journey</div>
+
+            <form method="POST">
+                <input class="auth-input" type="text" name="name" placeholder="Full Name" required>
+                <input class="auth-input" type="email" name="email" placeholder="Email address" required>
+                <input class="auth-input" type="password" name="password" placeholder="Password" required>
+
+                <button class="auth-btn">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="/login">Login</a>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 </body>

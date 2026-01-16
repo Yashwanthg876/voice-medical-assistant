@@ -1,0 +1,2 @@
+from src.supabase_client import supabase
+supabase.table("users").select("*").execute()

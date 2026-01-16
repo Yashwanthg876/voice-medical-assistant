@@ -1,47 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
-    <style>
-        body {
-            background-color: #eef2f3;
-            font-family: Arial;
-        }
-
-        .box {
-            max-width: 400px;
-            background: white;
-            padding: 30px;
-            margin: 100px auto;
-            border-radius: 10px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
-        }
-
-        input, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-        }
-    </style>
+    <title>Login | MedAssist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-<div class="box">
-    <h2>Login</h2>
-    <form method="post">
-        <input name="email" placeholder="Email" required>
-        <input name="password" type="password" placeholder="Password" required>
-        <button>Login</button>
-    </form>
-    <p>New user? <a href="/register">Create account</a></p>
+<div class="auth-wrapper">
+    <div class="auth-container">
+
+        <div class="auth-left">
+            <h1>🩺 MedAssist</h1>
+            <p>AI-powered medical assistance built for trust, clarity, and intelligence.</p>
+        </div>
+
+        <div class="auth-right">
+            <div class="auth-title">Welcome Back</div>
+            <div class="auth-subtitle">Login to your medical assistant</div>
+
+            <form method="POST">
+                <input class="auth-input" type="email" name="email" placeholder="Email address" required>
+                <input class="auth-input" type="password" name="password" placeholder="Password" required>
+
+                <div class="auth-row">
+                    <label>
+                        <input type="checkbox"> Remember me
+                    </label>
+                </div>
+
+                <button class="auth-btn">Login</button>
+            </form>
+
+            <div class="auth-footer">
+                New to MedAssist? <a href="/register">Create an account</a>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 </body>

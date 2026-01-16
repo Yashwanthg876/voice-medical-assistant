@@ -1,144 +1,93 @@
 {% extends "base.html" %}
 {% block content %}
 
-<style>
-.assistant-container {
-    max-width: 900px;
-    margin: auto;
-}
+<div class="card" style="text-align:center;">
+    <h2 class="title">Voice Medical Assistant</h2>
+    <p class="subtitle">
+        Speak naturally. The AI will analyze symptoms and detect medical intent.
+    </p>
 
-.assistant-header {
-    margin-bottom: 20px;
-}
-
-.assistant-header h1 {
-    margin-bottom: 5px;
-}
-
-.assistant-header p {
-    color: #555;
-}
-
-.voice-card {
-    background: white;
-    padding: 30px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    text-align: center;
-}
-
-.mic-button {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    border: none;
-    background-color: #dc2626;
-    color: white;
-    font-size: 36px;
-    cursor: pointer;
-    margin: 20px 0;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.mic-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
-
-.status {
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.output-card {
-    margin-top: 25px;
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: left;
-}
-
-.output-label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #374151;
-}
-</style>
-
-<div class="assistant-container">
-
-    <div class="assistant-header">
-        <h1>🎙️ Voice Medical Assistant</h1>
-        <p>
-            Speak naturally to describe your symptoms or request medical help.
-            The assistant will analyze your voice input and respond accordingly.
-        </p>
+    <div id="assistantStatus"
+         style="margin:25px auto; padding:14px 24px;
+                display:inline-block;
+                border-radius:999px;
+                background:#dbeafe;
+                color:#1e3a8a;
+                font-weight:600;">
+        Idle
     </div>
 
-    <div class="voice-card">
-        <p class="status" id="status">Press the microphone and start speaking</p>
+    <div style="margin-top:30px;">
+        <button class="btn btn-primary" onclick="startRecording()">🎙 Start Listening</button>
+        <button class="btn btn-danger" onclick="stopRecording()" style="margin-left:15px;">
+            ⏹ Stop
+        </button>
+    </div>
+</div>
 
-        <button class="mic-button" onclick="startRecording()">🎤</button>
+<div class="card">
+    <h3 class="title" style="font-size:22px;">Analysis Result</h3>
 
-        <div class="output-card">
-            <div class="output-label">📝 Transcribed Text</div>
-            <p id="transcript">—</p>
-
-            <div class="output-label" style="margin-top:15px;">🧠 Detected Intent</div>
-            <p id="intent">—</p>
-        </div>
+    <div style="margin-top:20px;">
+        <p class="subtitle"><strong>📝 Transcribed Text</strong></p>
+        <p id="transcribedText">—</p>
     </div>
 
+    <hr style="margin:25px 0; border:none; border-top:1px solid #e2e8f0;">
+
+    <div>
+        <p class="subtitle"><strong>🎯 Detected Intent</strong></p>
+        <p id="detectedIntent">—</p>
+    </div>
 </div>
 
 <script>
 let mediaRecorder;
 let audioChunks = [];
 
-function startRecording() {
-    document.getElementById("status").innerText = "Listening... please speak";
+const statusEl = document.getElementById("assistantStatus");
+const textEl = document.getElementById("transcribedText");
+const intentEl = document.getElementById("detectedIntent");
 
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
+async function startRecording() {
+    audioChunks = [];
+    statusEl.innerText = "Listening...";
 
-            audioChunks = [];
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
 
-            mediaRecorder.ondataavailable = e => {
-                audioChunks.push(e.data);
-            };
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
 
-            mediaRecorder.onstop = () => {
-                document.getElementById("status").innerText = "Processing voice input...";
+    mediaRecorder.onstop = async () => {
+        statusEl.innerText = "Processing...";
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", blob);
 
-                const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-                const formData = new FormData();
-                formData.append("audio", audioBlob);
+        try {
+            const res = await fetch("/upload_audio", {
+                method: "POST",
+                body: formData
+            });
 
-                fetch("/upload_audio", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById("transcript").innerText = data.text || "No text detected";
-                    document.getElementById("intent").innerText = data.intent || "Unknown";
-                    document.getElementById("status").innerText = "Press the microphone to speak again";
-                })
-                .catch(() => {
-                    document.getElementById("status").innerText = "Error processing audio";
-                });
-            };
+            const data = await res.json();
 
-            // Auto stop after 6 seconds
-            setTimeout(() => {
-                mediaRecorder.stop();
-            }, 6000);
-        })
-        .catch(() => {
-            document.getElementById("status").innerText = "Microphone access denied";
-        });
+            textEl.innerText = data.text || "—";
+            intentEl.innerText = data.intent || "—";
+            statusEl.innerText = "Completed";
+
+        } catch (err) {
+            statusEl.innerText = "Error";
+        }
+    };
+
+    mediaRecorder.start();
+}
+
+function stopRecording() {
+    if (mediaRecorder) {
+        mediaRecorder.stop();
+    }
 }
 </script>
 
